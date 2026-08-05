@@ -70,6 +70,9 @@
   }
   .card:hover{transform:translateY(-6px);box-shadow:0 14px 34px rgba(0,0,0,.6)}
   .card img{width:100%;height:100%;object-fit:cover;display:block}
+  .card iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .card.playing{cursor:default}
+  .card.playing:hover{transform:none;box-shadow:0 6px 20px rgba(0,0,0,.45)}
   .card .play{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:linear-gradient(180deg,rgba(0,0,0,.05) 40%,rgba(0,0,0,.55) 100%);
@@ -179,7 +182,7 @@
 <main id="stage"></main>
 
 <footer>
-  <div>&copy; <span id="yr"></span> <span class="brandline">Goose Media Group</span> &nbsp;•&nbsp; Nutley, NJ</div>
+  <div>&copy; <span id="yr"></span> <span class="brandline">Goose Media Group</span> &nbsp;&bull;&nbsp; Nutley, NJ</div>
   <div>goosemediagroup.com</div>
 </footer>
 
@@ -253,6 +256,30 @@ const stage = document.getElementById('stage');
 const GAP = 18;       // must match --gap
 const VISIBLE = 3;    // reels shown at once
 
+// Long-form videos play right in their tile (no lightbox, no navigation).
+// Only one video plays at a time page-wide; ROW_STATES lets any row (or the
+// lightbox) stop every inline player before starting a new one.
+const ROW_STATES = [];
+function embedSrc(id){
+  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1`;
+}
+function stopAllInline(){
+  ROW_STATES.forEach(s => {
+    if(s.playing){
+      s.playing.el.innerHTML = s.playing.html;   // restore the thumbnail tile
+      s.playing.el.classList.remove('playing');
+      s.playing = null;
+    }
+  });
+}
+function playInline(card, id, state){
+  stopAllInline();
+  state.playing = { el: card, html: card.innerHTML };
+  card.classList.add('playing');
+  card.innerHTML = `<iframe src="${embedSrc(id)}"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+}
+
 function buildCard(cat, v, vi, state){
   const id = ytId(v.url);
   const card = document.createElement('div');
@@ -265,7 +292,12 @@ function buildCard(cat, v, vi, state){
       <div class="play"><div class="btn">${PLAY_SVG}</div></div>`;
     card.addEventListener('click', () => {
       if(state.dragged) return;         // ignore click that ended a swipe
-      openLightbox(id, v.title || cat.name, cat.landscape);
+      if(card.classList.contains('playing')) return;
+      if(cat.landscape){
+        playInline(card, id, state);    // long form: play in place, same tile
+      } else {
+        openLightbox(id, v.title || cat.name, cat.landscape);
+      }
     });
   } else {
     card.className = 'card placeholder';
@@ -292,7 +324,8 @@ CATEGORIES.forEach((cat) => {
     </div>`;
   const viewport = row.querySelector('.viewport');
   const track = row.querySelector('.track');
-  const state = { dragged:false };
+  const state = { dragged:false, playing:null };
+  ROW_STATES.push(state);
 
   cat.videos.forEach((v, vi) => track.appendChild(buildCard(cat, v, vi, state)));
 
@@ -327,6 +360,7 @@ CATEGORIES.forEach((cat) => {
   // NEXT: slide left one reel, then move the first reel to the far right (revolving door)
   function shiftNext(){
     if(animating || !canLoop) return;
+    stopAllInline();                     // don't let audio keep playing off-screen
     animating = true;
     const dist = cardW + GAP;
     track.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
@@ -344,6 +378,7 @@ CATEGORIES.forEach((cat) => {
   // PREV: put the last reel up front, then slide right into place
   function shiftPrev(){
     if(animating || !canLoop) return;
+    stopAllInline();                     // don't let audio keep playing off-screen
     animating = true;
     const dist = cardW + GAP;
     track.style.transition = 'none';
@@ -378,13 +413,14 @@ CATEGORIES.forEach((cat) => {
 // Re-measure once fonts/layout settle
 window.addEventListener('load', () => window.dispatchEvent(new Event('resize')));
 
-// ---------- Lightbox ----------
+// ---------- Lightbox (reels only — long form plays inline in its tile) ----------
 const lb = document.getElementById('lightbox');
 const lbFrame = lb.querySelector('.lb-frame');
 const lbMount = document.getElementById('lbMount');
 function openLightbox(id, title, landscape){
+  stopAllInline();                       // one player at a time, page-wide
   lbFrame.classList.toggle('wide', !!landscape);
-  lbMount.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
+  lbMount.innerHTML = `<iframe src="${embedSrc(id)}"
       allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
   lb.classList.add('open');
 }
