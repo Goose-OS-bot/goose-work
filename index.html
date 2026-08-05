@@ -139,7 +139,8 @@
     background:#000;box-shadow:0 20px 60px rgba(0,0,0,.7);
   }
   .lb-frame.wide{width:min(960px,94vw);aspect-ratio:16/9;max-height:82vh}
-  .lb-frame iframe{width:100%;height:100%;border:0}
+  #lbMount{position:absolute;inset:0}
+  .lb-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .lb-close{
     position:absolute;top:-6px;right:-6px;transform:translate(50%,-50%);
     width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
@@ -147,20 +148,6 @@
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:2;
   }
-  .lb-title{
-    position:absolute;left:0;right:0;bottom:0;padding:40px 16px 52px;
-    background:linear-gradient(180deg,transparent,rgba(0,0,0,.85));
-    font-weight:500;font-size:14px;pointer-events:none;
-  }
-  .lb-watch{
-    position:absolute;left:16px;bottom:14px;z-index:3;
-    display:inline-flex;align-items:center;gap:6px;
-    padding:8px 14px;border-radius:22px;
-    background:var(--brand);color:#fff;text-decoration:none;
-    font-weight:600;font-size:12.5px;letter-spacing:.2px;
-    box-shadow:0 4px 14px rgba(0,0,0,.5);
-  }
-  .lb-watch:hover{filter:brightness(1.08)}
 
   footer{
     max-width:1400px;margin:24px auto 0;padding:22px 40px 46px;
@@ -201,8 +188,6 @@
   <div class="lb-frame">
     <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
     <div id="lbMount"></div>
-    <div class="lb-title" id="lbTitle"></div>
-    <a class="lb-watch" id="lbWatch" target="_blank" rel="noopener">Watch on YouTube ↗</a>
   </div>
 </div>
 
@@ -274,8 +259,8 @@ function buildCard(cat, v, vi, state){
   if(id){
     card.className = 'card';
     card.innerHTML = `
-      <img src="https://i.ytimg.com/vi/${id}/oardefault.jpg"
-           onerror="this.onerror=function(){this.onerror=null;this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'};this.src='https://i.ytimg.com/vi/${id}/maxresdefault.jpg'" alt="">
+      <img src="https://i.ytimg.com/vi/${id}/${cat.landscape ? 'maxresdefault' : 'oardefault'}.jpg"
+           onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'" alt="">
       ${v.title ? `<div class="vtitle">${v.title}</div>` : ''}
       <div class="play"><div class="btn">${PLAY_SVG}</div></div>`;
     card.addEventListener('click', () => {
@@ -397,15 +382,10 @@ window.addEventListener('load', () => window.dispatchEvent(new Event('resize')))
 const lb = document.getElementById('lightbox');
 const lbFrame = lb.querySelector('.lb-frame');
 const lbMount = document.getElementById('lbMount');
-const lbTitle = document.getElementById('lbTitle');
-const lbWatch = document.getElementById('lbWatch');
 function openLightbox(id, title, landscape){
   lbFrame.classList.toggle('wide', !!landscape);
-  // youtube-nocookie is more forgiving for embeds; the Watch link is a guaranteed fallback
   lbMount.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
       allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
-  lbWatch.href = `https://youtu.be/${id}`;
-  lbTitle.textContent = title || '';
   lb.classList.add('open');
 }
 function closeLightbox(){ lb.classList.remove('open'); lbMount.innerHTML=''; }
