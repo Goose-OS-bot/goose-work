@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goose Media Group — Work Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#E84B2A;        /* red-orange */
+    --ink:#1A1A1A;          /* near-black */
+    --blue:#1A3C5E;         /* dark blue */
+    --gray:#F5F5F5;
+    --bg:#0e0e10;           /* dark stage so reels pop */
+    --card-w: 232px;        /* card width */
+    --gap: 18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Poppins',system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    color:#fff;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    padding:34px 40px 10px;
+    display:flex;flex-direction:column;gap:6px;
+    max-width:1400px;margin:0 auto;
+  }
+  .brand{
+    font-weight:800;font-size:26px;letter-spacing:.5px;
+    color:var(--brand);
+  }
+  .brand span{color:#fff}
+  .tagline{font-weight:300;font-size:13px;color:#9aa2ad;letter-spacing:.4px}
+  .hr{height:3px;background:var(--brand);border:0;border-radius:3px;margin:16px 40px 6px;max-width:1400px;}
+  .intro{
+    max-width:1400px;margin:0 auto;padding:6px 40px 8px;
+    font-weight:300;font-size:15px;color:#c9ced6;max-width:760px;
+  }
+
+  /* ---------- Category rows ---------- */
+  .row{max-width:1060px;margin:0 auto;padding:26px 0 8px;}
+  .row-head{
+    display:flex;align-items:baseline;gap:14px;
+    padding:0 24px 14px;
+  }
+  .row-title{font-weight:600;font-size:20px;letter-spacing:.2px}
+  .row-title .dot{color:var(--brand)}
+  .row-blurb{font-weight:300;font-size:13px;color:#8b929c}
+
+  .carousel{position:relative;width:calc(100% - 72px);margin:0 auto}
+  .viewport{overflow:hidden;padding:6px 0 20px}
+  .track{display:flex;align-items:flex-start;gap:var(--gap);will-change:transform}
+
+  /* ---------- Reel card (9:16) ---------- */
+  .card{
+    position:relative;flex:0 0 auto;
+    aspect-ratio:9/16;border-radius:16px;overflow:hidden;
+    scroll-snap-align:start;cursor:pointer;
+    background:#17181c;
+    box-shadow:0 6px 20px rgba(0,0,0,.45);
+    transition:transform .25s ease, box-shadow .25s ease;
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:0 14px 34px rgba(0,0,0,.6)}
+  .card img{width:100%;height:100%;object-fit:cover;display:block}
+  .card .play{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,rgba(0,0,0,.05) 40%,rgba(0,0,0,.55) 100%);
+    transition:background .25s ease;
+  }
+  .card:hover .play{background:linear-gradient(180deg,rgba(0,0,0,.15) 30%,rgba(0,0,0,.6) 100%)}
+  .play .btn{
+    width:56px;height:56px;border-radius:50%;
+    background:rgba(232,75,42,.92);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 16px rgba(0,0,0,.4);transition:transform .2s ease;
+  }
+  .card:hover .play .btn{transform:scale(1.08)}
+  .play .btn svg{width:22px;height:22px;fill:#fff;margin-left:3px}
+  .card .vtitle{
+    position:absolute;top:0;left:0;right:0;padding:12px 14px 26px;
+    font-weight:600;font-size:13.5px;line-height:1.25;letter-spacing:.1px;
+    background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,0));
+    text-shadow:0 1px 5px rgba(0,0,0,.7);z-index:2;pointer-events:none;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .card .tag{
+    position:absolute;top:12px;left:12px;
+    font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;
+    background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+    padding:5px 9px;border-radius:20px;color:#fff;
+  }
+
+  /* placeholder tile (no real video yet) */
+  .card.placeholder .play{background:none}
+  .card.placeholder{
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+    background:radial-gradient(120% 120% at 50% 0%, #23252b 0%, #141519 100%);
+    border:1px dashed rgba(255,255,255,.14);
+  }
+  .card.placeholder .ph-icon{width:44px;height:44px;opacity:.85}
+  .card.placeholder .ph-icon svg{width:100%;height:100%;fill:none;stroke:var(--brand);stroke-width:1.6}
+  .card.placeholder .ph-text{font-weight:400;font-size:12.5px;color:#8b929c;text-align:center;padding:0 18px;line-height:1.4}
+  .card.placeholder .ph-num{position:absolute;top:12px;left:14px;font-weight:700;font-size:13px;color:rgba(255,255,255,.35)}
+
+  /* arrows */
+  .nav{
+    position:absolute;top:calc(50% - 12px);transform:translateY(-50%);
+    width:60px;height:60px;border-radius:50%;cursor:pointer;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(20,21,25,.92);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 22px rgba(0,0,0,.6);z-index:5;
+    transition:background .2s ease, transform .15s ease;
+  }
+  .nav:hover{background:var(--brand);transform:translateY(-50%) scale(1.08)}
+  .nav:active{transform:translateY(-50%) scale(.96)}
+  .nav svg{width:30px;height:30px;fill:#fff}
+  .nav.prev{left:-30px}
+  .nav.next{right:-30px}
+
+  /* ---------- Lightbox ---------- */
+  .lightbox{
+    position:fixed;inset:0;background:rgba(0,0,0,.9);
+    display:none;align-items:center;justify-content:center;z-index:100;
+    padding:24px;backdrop-filter:blur(6px);
+  }
+  .lightbox.open{display:flex}
+  .lb-frame{
+    position:relative;width:min(430px,92vw);aspect-ratio:9/16;
+    max-height:92vh;border-radius:18px;overflow:hidden;
+    background:#000;box-shadow:0 20px 60px rgba(0,0,0,.7);
+  }
+  .lb-frame.wide{width:min(960px,94vw);aspect-ratio:16/9;max-height:82vh}
+  .lb-frame iframe{width:100%;height:100%;border:0}
+  .lb-close{
+    position:absolute;top:-6px;right:-6px;transform:translate(50%,-50%);
+    width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
+    background:var(--brand);color:#fff;font-size:20px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:2;
+  }
+  .lb-title{
+    position:absolute;left:0;right:0;bottom:0;padding:40px 16px 52px;
+    background:linear-gradient(180deg,transparent,rgba(0,0,0,.85));
+    font-weight:500;font-size:14px;pointer-events:none;
+  }
+  .lb-watch{
+    position:absolute;left:16px;bottom:14px;z-index:3;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 14px;border-radius:22px;
+    background:var(--brand);color:#fff;text-decoration:none;
+    font-weight:600;font-size:12.5px;letter-spacing:.2px;
+    box-shadow:0 4px 14px rgba(0,0,0,.5);
+  }
+  .lb-watch:hover{filter:brightness(1.08)}
+
+  footer{
+    max-width:1400px;margin:24px auto 0;padding:22px 40px 46px;
+    border-top:1px solid rgba(255,255,255,.08);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    font-weight:300;font-size:12.5px;color:#8b929c;
+  }
+  footer .brandline{color:var(--brand);font-weight:600}
+
+  @media (max-width:640px){
+    :root{--card-w:170px}
+    header{padding:26px 22px 8px}
+    .hr,.intro,.row-head{padding-left:22px;padding-right:22px}
+    .hr{margin-left:22px;margin-right:22px}
+    .brand{font-size:22px}
+    .nav{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">GOOSE MEDIA GROUP<span></span></div>
+  <div class="tagline">Professional Video &amp; Photo Production</div>
+</header>
+<hr class="hr">
+<p class="intro">A look at the work. Scroll through each row, or hit the arrows to revolve through the reels. Every row is a different flavor of what we make.</p>
+
+<main id="stage"></main>
+
+<footer>
+  <div>&copy; <span id="yr"></span> <span class="brandline">Goose Media Group</span> &nbsp;•&nbsp; Nutley, NJ</div>
+  <div>goosemediagroup.com</div>
+</footer>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-frame">
+    <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
+    <div id="lbMount"></div>
+    <div class="lb-title" id="lbTitle"></div>
+    <a class="lb-watch" id="lbWatch" target="_blank" rel="noopener">Watch on YouTube ↗</a>
+  </div>
+</div>
+
+<script>
+/* =======================================================================
+   EDIT HERE  —  Add your videos.
+   Each category becomes one revolving row.
+   For "url" you can paste ANY YouTube link:
+       • https://youtube.com/shorts/XXXXXXXXXXX
+       • https://youtu.be/XXXXXXXXXXX
+       • https://www.youtube.com/watch?v=XXXXXXXXXXX
+   Leave "url" empty ("") to show a placeholder tile.
+   ======================================================================= */
+const CATEGORIES = [
+  {
+    name: "Highlights",
+    blurb: "A reel of our favorite recent work.",
+    videos: [
+      { url: "https://youtube.com/shorts/p3lduWca-K4", title: "Bar Franco Event Reel" },
+      { url: "https://youtube.com/shorts/3lMbtQ37o80", title: "Le Malt Highlight" },
+      { url: "https://youtube.com/shorts/a9TPenukYPY", title: "AREAA Gala Highlight" },
+      { url: "https://youtube.com/shorts/v5jcTgXUtCE", title: "Menu Highlight" },
+      { url: "https://youtube.com/shorts/TjZ15blwAds", title: "Cars & Cigars Ad" },
+    ]
+  },
+  {
+    name: "Talking Heads",
+    blurb: "Interviews, testimonials, and on-camera stories.",
+    videos: [
+      { url: "https://youtube.com/shorts/iz2Zlwqu-sc", title: "Pool House With Golf Sim" },
+      { url: "https://youtube.com/shorts/QJUFPXvjxaw", title: "VEC Paid Ad" },
+      { url: "https://youtube.com/shorts/O1MX9p2Fiqc", title: "TSC Reel 5" },
+      { url: "https://youtube.com/shorts/otKScmwDJwI", title: "LFP Gym Celebrity Chef Testimonial" },
+    ]
+  },
+  {
+    name: "Long Form",
+    blurb: "Brand films and longer stories.",
+    landscape: true,   // horizontal 16:9 tiles for full-length videos
+    videos: [
+      { url: "https://youtu.be/IpWHxI5NSUE", title: "César's New Book Launch" },
+      { url: "https://youtu.be/ctUSMvd5kLw", title: "4 Realities of building an online brand" },
+      { url: "https://youtu.be/-mDRWnGE8Wg", title: "Porto By Antonio About us" },
+      { url: "https://youtu.be/tnk1QJwhXG4", title: "TSC Website About Us" },
+    ]
+  },
+  // Add another category row by copying the block above and giving it a name + links.
+  // Add `landscape: true` for rows of horizontal (16:9) videos.
+];
+/* ===================== stop editing (unless you want to) ================= */
+
+// Extract a YouTube ID from any common URL form
+function ytId(url){
+  if(!url) return null;
+  const m = url.match(/(?:shorts\/|youtu\.be\/|v=|embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : (/^[A-Za-z0-9_-]{11}$/.test(url) ? url : null);
+}
+
+const PLAY_SVG = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+const FILM_SVG = '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M17 9h4M3 15h4M17 15h4"/></svg>';
+
+const stage = document.getElementById('stage');
+const GAP = 18;       // must match --gap
+const VISIBLE = 3;    // reels shown at once
+
+function buildCard(cat, v, vi, state){
+  const id = ytId(v.url);
+  const card = document.createElement('div');
+  if(id){
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="https://i.ytimg.com/vi/${id}/oardefault.jpg"
+           onerror="this.onerror=function(){this.onerror=null;this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'};this.src='https://i.ytimg.com/vi/${id}/maxresdefault.jpg'" alt="">
+      ${v.title ? `<div class="vtitle">${v.title}</div>` : ''}
+      <div class="play"><div class="btn">${PLAY_SVG}</div></div>`;
+    card.addEventListener('click', () => {
+      if(state.dragged) return;         // ignore click that ended a swipe
+      openLightbox(id, v.title || cat.name, cat.landscape);
+    });
+  } else {
+    card.className = 'card placeholder';
+    card.innerHTML = `
+      <div class="ph-num">${String(vi+1).padStart(2,'0')}</div>
+      <div class="ph-icon">${FILM_SVG}</div>
+      <div class="ph-text"><strong style="color:#cbd0d8">${v.title || 'Your video'}</strong><br>paste a YouTube link to fill this tile</div>`;
+  }
+  return card;
+}
+
+CATEGORIES.forEach((cat) => {
+  const row = document.createElement('section');
+  row.className = 'row';
+  row.innerHTML = `
+    <div class="row-head">
+      <div class="row-title"><span class="dot">/</span> ${cat.name}</div>
+      <div class="row-blurb">${cat.blurb || ''}</div>
+    </div>
+    <div class="carousel">
+      <button class="nav prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6z"/></svg></button>
+      <div class="viewport"><div class="track"></div></div>
+      <button class="nav next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6z"/></svg></button>
+    </div>`;
+  const viewport = row.querySelector('.viewport');
+  const track = row.querySelector('.track');
+  const state = { dragged:false };
+
+  cat.videos.forEach((v, vi) => track.appendChild(buildCard(cat, v, vi, state)));
+
+  // Landscape (long-form) rows show one big video at a time; reel rows show three.
+  const VIS = cat.landscape ? 1 : VISIBLE;
+  // A row can revolve infinitely only if there are more videos than are shown.
+  const canLoop = cat.videos.length > VIS;
+  if(!canLoop){
+    row.querySelector('.prev').style.display = 'none';
+    row.querySelector('.next').style.display = 'none';
+  }
+
+  stage.appendChild(row); // attach first so widths measure correctly
+
+  let cardW = 0;
+  function sizeCards(){
+    const vw = viewport.clientWidth;
+    if(!vw) return;                       // wait until the row has a real width
+    cardW = (vw - GAP*(VIS-1)) / VIS;
+    const ratio = cat.landscape ? 9/16 : 16/9;    // landscape rows are 16:9, reels are 9:16
+    [...track.children].forEach(c => {
+      c.style.width  = cardW + 'px';
+      c.style.height = (cardW * ratio) + 'px';     // lock the correct proportion immediately
+    });
+  }
+  sizeCards();
+  const reset = () => { sizeCards(); track.style.transition='none'; track.style.transform='translateX(0)'; };
+  if('ResizeObserver' in window){ new ResizeObserver(reset).observe(viewport); } // fires on first real layout
+  window.addEventListener('resize', reset);
+
+  let animating = false;
+  // NEXT: slide left one reel, then move the first reel to the far right (revolving door)
+  function shiftNext(){
+    if(animating || !canLoop) return;
+    animating = true;
+    const dist = cardW + GAP;
+    track.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+    track.style.transform = `translateX(${-dist}px)`;
+    const done = () => {
+      track.removeEventListener('transitionend', done);
+      track.style.transition = 'none';
+      track.appendChild(track.firstElementChild);   // wrap first -> end
+      track.style.transform = 'translateX(0)';
+      void track.offsetWidth;                        // commit without animating
+      animating = false;
+    };
+    track.addEventListener('transitionend', done);
+  }
+  // PREV: put the last reel up front, then slide right into place
+  function shiftPrev(){
+    if(animating || !canLoop) return;
+    animating = true;
+    const dist = cardW + GAP;
+    track.style.transition = 'none';
+    track.insertBefore(track.lastElementChild, track.firstElementChild); // wrap end -> front
+    track.style.transform = `translateX(${-dist}px)`;
+    void track.offsetWidth;
+    track.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)';
+    track.style.transform = 'translateX(0)';
+    const done = () => {
+      track.removeEventListener('transitionend', done);
+      track.style.transition = 'none';
+      animating = false;
+    };
+    track.addEventListener('transitionend', done);
+  }
+  row.querySelector('.next').addEventListener('click', shiftNext);
+  row.querySelector('.prev').addEventListener('click', shiftPrev);
+
+  // swipe support (mobile / trackpad)
+  let sx = null;
+  viewport.addEventListener('pointerdown', e => { sx = e.clientX; state.dragged = false; });
+  viewport.addEventListener('pointermove', e => { if(sx !== null && Math.abs(e.clientX - sx) > 8) state.dragged = true; });
+  viewport.addEventListener('pointerup', e => {
+    if(sx === null) return;
+    const dx = e.clientX - sx;
+    if(Math.abs(dx) > 40){ dx < 0 ? shiftNext() : shiftPrev(); }
+    sx = null;
+    setTimeout(() => state.dragged = false, 0);
+  });
+});
+
+// Re-measure once fonts/layout settle
+window.addEventListener('load', () => window.dispatchEvent(new Event('resize')));
+
+// ---------- Lightbox ----------
+const lb = document.getElementById('lightbox');
+const lbFrame = lb.querySelector('.lb-frame');
+const lbMount = document.getElementById('lbMount');
+const lbTitle = document.getElementById('lbTitle');
+const lbWatch = document.getElementById('lbWatch');
+function openLightbox(id, title, landscape){
+  lbFrame.classList.toggle('wide', !!landscape);
+  // youtube-nocookie is more forgiving for embeds; the Watch link is a guaranteed fallback
+  lbMount.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+  lbWatch.href = `https://youtu.be/${id}`;
+  lbTitle.textContent = title || '';
+  lb.classList.add('open');
+}
+function closeLightbox(){ lb.classList.remove('open'); lbMount.innerHTML=''; }
+document.getElementById('lbClose').addEventListener('click', closeLightbox);
+lb.addEventListener('click', e=>{ if(e.target===lb) closeLightbox(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLightbox(); });
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
